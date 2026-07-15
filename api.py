@@ -27,10 +27,6 @@ def verify_api_key(x_api_key:str = Header(...)):
 @app.get("/")
 def read_root():
     return {"message": "Expense Tracker API is running"}
-
-@app.get("/")
-def read_root():
-    return {"message": "Expense Tracker API is running"}
 @app.get("/expenses", response_model=list[Expense])
 def list_expenses(auth:None = Depends(verify_api_key)):
     raw = get_all_expenses()
