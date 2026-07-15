@@ -19,6 +19,11 @@ class NewExpense(BaseModel):
     description:str
 class ExpenseText(BaseModel):
     text: str
+def verify_api_key(x_api_key:str = Header(...)):
+    expected_api_key=os.getenv("API_SECRET_KEY")
+    if x_api_key != expected_api_key:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+
 @app.get("/debug-db")
 def debug_db(auth: None = Depends(verify_api_key)):
     url = os.getenv("DATABASE_URL")
@@ -27,10 +32,10 @@ def debug_db(auth: None = Depends(verify_api_key)):
     else:
         host_part = "MISSING OR MALFORMED"
     return {"connected_host": host_part}
-def verify_api_key(x_api_key:str = Header(...)):
-    expected_api_key=os.getenv("API_SECRET_KEY")
-    if x_api_key != expected_api_key:
-        raise HTTPException(status_code=401, detail="Invalid API Key")
+
+@app.get("/")
+def read_root():
+    return {"message": "Expense Tracker API is running"}
 
 @app.get("/")
 def read_root():
