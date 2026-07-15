@@ -24,15 +24,6 @@ def verify_api_key(x_api_key:str = Header(...)):
     if x_api_key != expected_api_key:
         raise HTTPException(status_code=401, detail="Invalid API Key")
 
-@app.get("/debug-db")
-def debug_db(auth: None = Depends(verify_api_key)):
-    url = os.getenv("DATABASE_URL")
-    if url and "@" in url:
-        host_part = url.split("@")[1]
-    else:
-        host_part = "MISSING OR MALFORMED"
-    return {"connected_host": host_part}
-
 @app.get("/")
 def read_root():
     return {"message": "Expense Tracker API is running"}
