@@ -3,9 +3,21 @@ from api import app
 from dotenv import load_dotenv
 import os
 import json
+import pytest
+import psycopg2
 load_dotenv()
 
 
+TEST_MARKER = "pytest-automated-test"
+
+@pytest.fixture(autouse=True)
+def cleanup_test_data():
+    yield
+    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM expenses WHERE category = %s", (TEST_MARKER,))
+    conn.commit()
+    conn.close()
 client=TestClient(app)
 def test_root_read():
     response=client.get("/")
@@ -26,5 +38,5 @@ def test_expenses_correct_key():
 def test_expenses_create():
     realkey=os.getenv("API_SECRET_KEY")
     response=client.post("/expenses", headers={"x-api-key":realkey}, 
-    json={"amount": 10.0, "category": "test", "description": "pytest test insert"})
+    json={"amount": 10.0, "category": TEST_MARKER, "description": "pytest test insert"})
     assert response.status_code==200
